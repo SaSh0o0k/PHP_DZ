@@ -23,13 +23,12 @@
             <th scope="col">Назва</th>
             <th scope="col">Дата</th>
             <th scope="col">Опис</th>
+            <th scope="col">Дія</th>
         </tr>
         </thead>
         <tbody>
         <?php
-        // use the connection here
         $stm = $dbh->query('SELECT * FROM news');
-        // fetch all rows into array, by default PDO::FETCH_BOTH is used
         $rows = $stm->fetchAll();
         foreach($rows as $row) {
             $id = $row["id"];
@@ -37,18 +36,26 @@
             $datepublish = $row["datepublish"];
             $description = $row["description"];
             echo "
-        <tr>
-            <th scope='row'>$id</th>
-            <td>$name</td>
-            <td>$datepublish</td>
-            <td>$description</td>
-        </tr>
+                <tr>
+                    <th scope='row'>$id</th>
+                    <td>$name</td>
+                    <td>" . date('Y-m-d H:i', strtotime($datepublish)) . "</td>
+                    <td>$description</td>
+                    <td>
+                        <a href='edit.php?id=$id' class='btn btn-primary'>Редагувати</a>
+                        <form method='post' action='delete.php'>
+                            <input type='hidden' name='id' value='$id'>
+                            <button type='submit' class='btn btn-danger'>Видалити</button>
+                        </form>
+                    </td>
+                </tr>
             ";
         }
         ?>
 
         </tbody>
     </table>
+    <button type="button" class="btn btn-primary" onclick="location.href='/create.php'">Додати новину</button>
 </div>
 
 <script src="/js/bootstrap.bundle.min.js"></script>
