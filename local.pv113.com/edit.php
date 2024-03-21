@@ -1,6 +1,8 @@
+<?php global $dbh; ?>
+
 <?php
-global $dbh;
 include_once $_SERVER["DOCUMENT_ROOT"]."/connection_database.php";
+include_once $_SERVER['DOCUMENT_ROOT'] . "/config/constants.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
     $id = $_POST["id"];
@@ -8,21 +10,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
     $datepublish = $_POST["datepublish"];
     $description = $_POST["description"];
 
-    $sql = "UPDATE news SET name = :name, datepublish = :datepublish, description = :description WHERE id = :id";
-    $stmt = $dbh->prepare($sql);
-    $stmt->bindParam(':name', $name);
-    $stmt->bindParam(':datepublish', $datepublish);
-    $stmt->bindParam(':description', $description);
-    $stmt->bindParam(':id', $id);
-    $stmt->execute();
+    // Перевірка, чи завантажено файл зображення
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $image = $_FILES['image'];
+
+        // Видалення старого зображення
+        $stmt = $dbh->prepare("SELECT image FROM news WHERE id = ?");
+        $stmt->execute([$id]);
+        $old_image = $stmt->fetchColumn();
+
+        if ($old_image) {
+            unlink($_SERVER['DOCUMENT_ROOT'] . '/' . UPLOADING . '/' . $old_image);
+        }
+
+        // Завантаження нового зображення
+        $image_save = uniqid() . '.' . pathinfo($image["name"], PATHINFO_EXTENSION);
+        $path_save = $_SERVER['DOCUMENT_ROOT'] . '/' . UPLOADING . '/' . $image_save;
+        move_uploaded_file($image['tmp_name'], $path_save);
+
+        // Оновлення бази даних новим зображенням
+        $sql = "UPDATE news SET name = ?, datepublish = ?, description = ?, image = ? WHERE id = ?";
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute([$name, $datepublish, $description, $image_save, $id]);
+    } else {
+        // Не завантажено нове зображення, оновити без зміни зображення
+        $sql = "UPDATE news SET name = ?, datepublish = ?, description = ? WHERE id = ?";
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute([$name, $datepublish, $description, $id]);
+    }
 
     header("Location: /");
     exit();
 } elseif (isset($_GET['id'])) {
     $id = $_GET['id'];
-    $stmt = $dbh->prepare("SELECT * FROM news WHERE id = :id");
-    $stmt->bindParam(':id', $id);
-    $stmt->execute();
+    $stmt = $dbh->prepare("SELECT * FROM news WHERE id = ?");
+    $stmt->execute([$id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 } else {
     echo "Недопустимий запит.";
@@ -43,21 +65,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
 <div class="container py-3">
     <?php include_once $_SERVER["DOCUMENT_ROOT"]."/_header.php"; ?>
     <h2 class="mb-3">Редагувати новину</h2>
-    <form method="post" action="">
-    <input type="hidden" name="id" value="<?php echo $id; ?>">
-    <div class="mb-3">
-        <label for="name" class="form-label">Назва новини</label>
-        <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($row['name']); ?>" required>
-    </div>
-    <div class="mb-3">
-        <label for="datepublish" class="form-label">Дата і час публікації</label>
-        <input type="datetime-local" class="form-control" id="datepublish" name="datepublish" value="<?php echo date('Y-m-d\TH:i', strtotime($row['datepublish'])); ?>" required
-               min="<?php echo date('Y-m-d\TH:i'); ?>">
-    </div>
-    <div class="mb-3">
-        <label for="description" class="form-label">Опис новини</label>
-        <textarea class="form-control" id="description" name="description" rows="5" required><?php echo htmlspecialchars($row['description']); ?></textarea>
-    </div>
+    <form method="post" action="" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="<?php echo $id; ?>">
+        <div class="mb-3">
+            <label for="name" class="form-label">Назва новини</label>
+            <input type="text" class="form-control" id="name" name="name"
+                   value="<?php echo htmlspecialchars($row['name']); ?>" required>
+        </div>
+        <div class="mb-3">
+            <label for="datepublish" class="form-label">Дата і час публікації</label>
+            <input type="datetime-local" class="form-control" id="datepublish" name="datepublish"
+                   value="<?php echo date('Y-m-d\TH:i', strtotime($row['datepublish'])); ?>" required
+                   min="<?php echo date('Y-m-d\TH:i'); ?>">
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Опис новини</label>
+            <textarea class="form-control" id="description" name="description" rows="5"
+                      required><?php echo htmlspecialchars($row['description']); ?></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="formFile" class="form-label">Змінити фото</label>
+            <input class="form-control" type="file" accept="image/*" id="image" name="image">
+        </div>
         <button type="submit" class="btn btn-primary">Зберегти зміни</button>
     </form>
 </div>

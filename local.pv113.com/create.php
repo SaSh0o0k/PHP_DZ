@@ -1,11 +1,10 @@
 <?php global $dbh; ?>
 
 <?php include_once ($_SERVER['DOCUMENT_ROOT']."/config/constants.php"); ?>
+<?php include_once $_SERVER["DOCUMENT_ROOT"]."/connection_database.php"; ?>
 
 <?php
 if($_SERVER["REQUEST_METHOD"]=="POST") {
-    include_once $_SERVER["DOCUMENT_ROOT"]."/connection_database.php";
-
     $name = $_POST['name'];
     $datepublish = $_POST['datepublish'];
     $description = $_POST['description'];
@@ -23,9 +22,10 @@ if($_SERVER["REQUEST_METHOD"]=="POST") {
     }
 
     $stmt = $dbh->prepare("INSERT INTO news (name, datepublish, description, image) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$name, $datepublish, $description, $image]);
+    $stmt->execute([$name, $datepublish, $description, $image_save]);
+    $lastInsertedId = $dbh->lastInsertId();
 
-    header("Location: /");
+    header("Location: /?id=".$lastInsertedId);
     exit();
 }
 
