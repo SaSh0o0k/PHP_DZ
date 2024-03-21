@@ -42,7 +42,7 @@
                     <th scope='row'>$id</th>
                     <td>$name</td>
                     <td>
-                        <img src='/images/$image' alt='$name' width='100' >
+                       <img src='/images/$image' alt='' width='100'>
                     </td>
                     <td>" . date('Y-m-d H:i', strtotime($datepublish)) . "</td>
                     <td>$description</td>
