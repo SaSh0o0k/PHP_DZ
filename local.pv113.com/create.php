@@ -1,4 +1,36 @@
 <?php global $dbh; ?>
+
+<?php include_once ($_SERVER['DOCUMENT_ROOT']."/config/constants.php"); ?>
+
+<?php
+if($_SERVER["REQUEST_METHOD"]=="POST") {
+    include_once $_SERVER["DOCUMENT_ROOT"]."/connection_database.php";
+
+    $name = $_POST['name'];
+    $datepublish = $_POST['datepublish'];
+    $description = $_POST['description'];
+    $image = $_FILES['image'];
+
+    $folderName = $_SERVER['DOCUMENT_ROOT'].'/'.UPLOADING;
+    if (!file_exists($folderName)) {
+        mkdir($folderName, 0777);
+    }
+    $image_save = "";
+    if(isset($_FILES['image'])) {
+        $image_save = uniqid().'.'.pathinfo($_FILES["image"]["name"],PATHINFO_EXTENSION);
+        $path_save = $folderName.'/'.$image_save;
+        move_uploaded_file($_FILES['image']['tmp_name'], $path_save);
+    }
+
+    $stmt = $dbh->prepare("INSERT INTO news (name, datepublish, description, image) VALUES (?, ?, ?, ?)");
+    $stmt->execute([$name, $datepublish, $description, $image]);
+
+    header("Location: /");
+    exit();
+}
+
+?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,25 +46,7 @@
 
     <h1 class="text-center">Додати новину</h1>
 
-    <form method="post" action="">
-        <?php
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            include_once $_SERVER["DOCUMENT_ROOT"]."/connection_database.php";
-
-            $name = $_POST["name"];
-            $datepublish = $_POST["datepublish"];
-            $description = $_POST["description"];
-
-            $stmt = $dbh->prepare("INSERT INTO news (name, datepublish, description) VALUES (:name, :datepublish, :description)");
-            $stmt->bindParam(':name', $name);
-            $stmt->bindParam(':datepublish', $datepublish);
-            $stmt->bindParam(':description', $description);
-            $stmt->execute();
-
-            header("Location: /");
-            exit();
-        }
-        ?>
+    <form method="post" action="" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="name" class="form-label">Назва новини</label>
             <input type="text" class="form-control" id="name" name="name" required>
@@ -43,9 +57,15 @@
                    min="<?php echo date('Y-m-d\TH:i'); ?>">
         </div>
         <div class="mb-3">
-            <label for="description" class="form-label">Опис новини</label>
+            <label for="description" class="form-label">Опис</label>
             <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
         </div>
+
+        <div class="mb-3">
+            <label for="formFile" class="form-label">Фото</label>
+            <input class="form-control" type="file" accept="image/*" id="image" name="image">
+        </div>
+
         <button type="submit" class="btn btn-primary">Створити</button>
     </form>
 </div>

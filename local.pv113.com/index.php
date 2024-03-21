@@ -21,6 +21,7 @@
         <tr>
             <th scope="col">#</th>
             <th scope="col">Назва</th>
+            <th scope="col">Фото</th>
             <th scope="col">Дата</th>
             <th scope="col">Опис</th>
             <th scope="col">Дія</th>
@@ -33,12 +34,16 @@
         foreach($rows as $row) {
             $id = $row["id"];
             $name = $row["name"];
+            $image = $row["image"];
             $datepublish = $row["datepublish"];
             $description = $row["description"];
             echo "
                 <tr>
                     <th scope='row'>$id</th>
                     <td>$name</td>
+                    <td>
+                        <img src='/images/$image' alt='$name' width='100' >
+                    </td>
                     <td>" . date('Y-m-d H:i', strtotime($datepublish)) . "</td>
                     <td>$description</td>
                     <td>
