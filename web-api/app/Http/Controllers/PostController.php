@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
 use Illuminate\Http\Request;
-
+use App\Models\Post;
+use Illuminate\Support\Facades\Storage;
 class PostController extends Controller
 {
     /**
@@ -17,6 +17,14 @@ class PostController extends Controller
     }
 
     /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return view('posts.create');
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -24,10 +32,27 @@ class PostController extends Controller
         $request->validate([
             'title' => 'required|max:255',
             'body' => 'required',
+            'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Перевірка на тип та розмір зображення
         ]);
-        Post::create($request->all());
-        return redirect()->route('posts.index')
-            ->with('success','Post created successfully.');
+
+        // Отримання зображення з запиту та збереження в директорії збереження
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs('public/images', $imageName);
+        } else {
+            $imageName = null;
+        }
+
+        // Створення поста з врахуванням зображення
+        $post = new Post([
+            'title' => $request->get('title'),
+            'body' => $request->get('body'),
+            'image' => $imageName,
+        ]);
+        $post->save();
+
+        return redirect()->route('posts.index')->with('success', 'Post created successfully.');
     }
 
     /**
@@ -40,6 +65,18 @@ class PostController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id)
+    {
+        $post = Post::find($id);
+        return view('posts.edit', compact('post'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
@@ -47,11 +84,34 @@ class PostController extends Controller
         $request->validate([
             'title' => 'required|max:255',
             'body' => 'required',
+            'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Перевірка на тип та розмір зображення
         ]);
+
+        // Отримання зображення з запиту та збереження в директорії збереження
+        if ($request->hasFile('image')) {
+            // Видалення попереднього зображення
+            $post = Post::find($id);
+            if ($post->image) {
+                Storage::delete('public/images/' . $post->image);
+            }
+
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs('public/images', $imageName);
+        } else {
+            $imageName = null;
+        }
+
+        // Оновлення поста з врахуванням зображення
         $post = Post::find($id);
-        $post->update($request->all());
-        return redirect()->route('posts.index')
-            ->with('success', 'Post updated successfully.');
+        $post->title = $request->get('title');
+        $post->body = $request->get('body');
+        if ($imageName) {
+            $post->image = $imageName;
+        }
+        $post->save();
+
+        return redirect()->route('posts.index')->with('success', 'Post updated successfully.');
     }
 
     /**
@@ -60,19 +120,13 @@ class PostController extends Controller
     public function destroy(string $id)
     {
         $post = Post::find($id);
+
+        // Видалення зображення, якщо воно є
+        if ($post->image) {
+            Storage::delete('public/images/' . $post->image);
+        }
+
         $post->delete();
-        return redirect()->route('posts.index')
-            ->with('success', 'Post deleted successfully');
-    }
-
-    public function create()
-    {
-        return view('posts.create');
-    }
-
-    public function edit($id)
-    {
-        $post = Post::find($id);
-        return view('posts.edit', compact('post'));
+        return redirect()->route('posts.index')->with('success', 'Post deleted successfully');
     }
 }
