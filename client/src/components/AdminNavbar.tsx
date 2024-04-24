@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { IconBell, IconMenu2, IconSettings, IconSquareRoundedX, IconUser } from "@tabler/icons-react";
-import { Input } from "./ui/input.tsx";
+import { Input } from "./ui/Input.tsx";
 import { classNames } from "../utils/classNames.ts";
-import MenuItem from "./ui/menuItem.tsx";
-import { Button } from "./ui/button.tsx";
+import MenuItem from "./ui/MenuItem.tsx";
+import { Button } from "./ui/Button.tsx";
 import Breadcrumb from "./Breadcrumb.tsx";
 import Drawer from "./ui/drawer.tsx";
 

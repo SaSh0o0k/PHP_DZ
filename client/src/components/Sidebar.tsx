@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import MenuItem from "./ui/menuItem.tsx";
+import MenuItem from "./ui/MenuItem.tsx";
 import {
     IconDashboard,
     IconHome,
