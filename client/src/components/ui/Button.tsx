@@ -9,14 +9,15 @@ const buttonVariants = cva(
             variant: {
                 default: "text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br",
                 cancel: "text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br",
-                outlined: "border border-black border-dashed hover:bg-gray-200", //+++
-                icon: "hover:bg-gray-200", //+++
+                outlined: "border border-black border-dashed hover:bg-gray-200",
+                icon: "hover:bg-gray-200",
+                contained: "text-white bg-blue-600 hover:bg-blue-700", // Доданий варіант 'contained'
             },
             size: {
                 default: "h-10 px-5",
                 sm: "h-9 px-3",
-                lg: "h-10 w-52 px-5", //+++
-                icon: "h-12 w-12 p-3", //+++
+                lg: "h-10 w-52 px-5",
+                icon: "h-12 w-12 p-3",
             },
         },
         defaultVariants: {

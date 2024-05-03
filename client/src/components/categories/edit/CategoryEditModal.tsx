@@ -1,125 +1,112 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { IconCirclePlus, IconCircleX, IconLoader } from "@tabler/icons-react";
-import { Button } from "../../ui/Button.tsx";
-import FormError from "../../ui/FormError.tsx";
-import Label from "../../ui/Label.tsx";
-import Modal from "../../ui/Modal.tsx";
-import Title from "../../ui/Title.tsx";
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useEditCategoryMutation, useGetCategoryQuery } from "../../../services/category.ts";
-import { API_URL } from "../../../utils/apiUrl.ts";
-import showToast from "../../../utils/showToast.ts";
-import { EditCategorySchema, EditCategorySchemaType } from "./zod.ts";
-import FileUpload from "../../ui/FileUpload.tsx";
-import { Input } from "../../ui/Input.tsx";
-import Skeleton from "../../helpers/Skeleton.tsx";
-
-type EditCategoryProps = {
-    id: number;
-    open: boolean;
-    close: () => void;
-};
-const CategoryEdit = (props: EditCategoryProps) => {
-    const { id, close } = props;
-    const { data, isLoading } = useGetCategoryQuery(id);
-    const [previewImage, setPreviewImage] = useState<string | undefined>();
-
-    const [editCategory] = useEditCategoryMutation();
-
-    useEffect(() => {
-        console.log("Get Data Server by id");
-        if (data) {
-            setPreviewImage(`${API_URL}/upload/150_${data.image}`);
-        }
-    }, [data]);
-
-    const {
-        register,
-        handleSubmit,
-        reset,
-        formState: { errors },
-    } = useForm<EditCategorySchemaType>({ resolver: zodResolver(EditCategorySchema) });
-
-    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const input = event.target;
-        const file = input.files && input.files[0];
-
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function () {
-                setPreviewImage(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const onSubmit = handleSubmit(async (data) => {
-        try {
-            await editCategory({ id: id, category: { ...data, image: data.image[0] } }).unwrap();
-            close();
-            showToast(`Category ${data.name} edited successful!`, "success");
-        } catch (err) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            showToast(`Error edited ${data.name} category! ${err.error}`, "error");
-        }
-    });
-    const onReset = () => {
-        setPreviewImage(`${API_URL}/upload/150_${data?.image}`);
-        reset();
-    };
-
-    // @ts-ignore
-    return (
-        <Modal {...props}>
-            <Title className="pb-5">Edit category</Title>
-            {isLoading && <Skeleton />}
-
-            {data && (
-                <form className="flex flex-col gap-5" onSubmit={onSubmit}>
-                    <Label htmlFor="name">Name</Label>
-                    <Input {...register("name")} id="name" defaultValue={data.name} placeholder="Name..." />
-                    {errors?.name && <FormError errorMessage={errors?.name?.message as string} />}
-
-                    {/*<Label htmlFor="description">Description</Label>*/}
-                    {/*<Input*/}
-                    {/*    {...register("description")}*/}
-                    {/*    id="description"*/}
-                    {/*    defaultValue={data.description}*/}
-                    {/*    placeholder="Description..."*/}
-                    {/*/>*/}
-                    {/*{errors?.description && <FormError errorMessage={errors?.description?.message as string} />}*/}
-
-                    <Label htmlFor="image">Image</Label>
-                    <FileUpload preview={previewImage}>
-                        <Input {...register("image")} onChange={handleFileChange} id="image" variant="file" type="file" />
-                    </FileUpload>
-                    {errors?.image && <FormError errorMessage={errors?.image?.message as string} />}
-
-                    <div className="flex w-full items-center justify-center gap-5">
-                        <Button disabled={isLoading} size="lg" type="submit">
-                            {isLoading ? (
-                                <>
-                                    <IconLoader />
-                                    Loading...
-                                </>
-                            ) : (
-                                <>
-                                    <IconCirclePlus />
-                                    Save
-                                </>
-                            )}
-                        </Button>
-                        <Button disabled={isLoading} size="lg" type="button" variant="cancel" onClick={onReset}>
-                            <IconCircleX />
-                            Reset
-                        </Button>
-                    </div>
-                </form>
-            )}
-        </Modal>
-    );
-};
-
-export default CategoryEdit;
+// import Modal from "../../ui/Modal.tsx";
+// import {useForm} from "react-hook-form";
+// import {z} from "zod";
+// import {zodResolver} from "@hookform/resolvers/zod";
+// import {ACCEPTED_IMAGE_MIME_TYPES, MAX_FILE_SIZE} from "../../../constants";
+// import {Input} from "../../ui/Input.tsx";
+// import {Button} from "../../ui/Button.tsx";
+// import Label from "../../ui/Label.tsx";
+// import FormError from "../../ui/FormError.tsx";
+// // Потрібно імпортувати функцію для редагування категорії
+// import {useEffect} from "react";
+// import {IconCirclePlus, IconCircleX, IconLoader} from "@tabler/icons-react";
+// import Title from "../../ui/Title.tsx";
+// import showToast from "../../../utils/showToast.ts";
+// import {useEditCategoryMutation} from "../../../services/category.ts";
+//
+// type EditCategoryModalProps = {
+//     open: boolean;
+//     close: () => void;
+//     categoryId: number; // Ідентифікатор категорії, яку ми будемо редагувати
+//     // prevImage: string;
+//     categoryData: {
+//         name: string;
+//         description: string;
+//         image: File | undefined;
+//     };
+// };
+//
+// type EditCategorySchemaType = z.infer<typeof EditCategorySchema>;
+//
+// const EditCategorySchema = z.object({
+//     name: z.string().trim().min(3).max(20),
+//     description: z.string().trim().min(3).max(50),
+//     image: z  .any()
+//         .refine((files) => files.length === 0 || files[0].size <= MAX_FILE_SIZE, `Max file size is 5MB.`)  .refine(
+//             (files) => files.length === 0 || ACCEPTED_IMAGE_MIME_TYPES.includes(files[0].type),    "Only .jpg, .jpeg, .png and .webp files are accepted.",
+//         ),
+// });
+//
+// const CategoryEditModal = (props: EditCategoryModalProps) => {
+//     const {open, close, categoryId, categoryData} = props;
+//     const [editCategory, {isLoading}] = useEditCategoryMutation(); // Використовуємо функцію для редагування категорії
+//
+//     const {
+//         register,
+//         handleSubmit,
+//         reset,
+//         setValue, // Функція для встановлення значення поля форми
+//         formState: {errors},
+//     } = useForm<EditCategorySchemaType>({
+//         resolver: zodResolver(EditCategorySchema),
+//         defaultValues: categoryData, // Встановлюємо значення полів форми за замовчуванням
+//     });
+//
+//     useEffect(() => {
+//         reset(categoryData); // При зміні categoryData встановлюємо нові значення для форми
+//     }, [categoryData, reset]);
+//
+//     const onSubmit = handleSubmit(async (data) => {
+//
+//         try {
+//             await editCategory({id: categoryId, ...data, image: data.image[0]}).unwrap();
+//             showToast(`Category ${data.name} successfully edited!`, "success");
+//             close();
+//         } catch (err) {
+//             console.log(err);
+//             showToast(`Error editing ${data.name} category! ${err.error}`, "error");
+//         }
+//     });
+//
+//     return (
+//         <Modal {...props}>
+//             <Title className="pb-5">Edit category</Title>
+//             <form className="flex flex-col gap-5" onSubmit={onSubmit}>
+//                 <Label htmlFor="name">Name</Label>
+//                 <Input {...register("name")} id="name" placeholder="Name..."/>
+//                 {errors?.name && <FormError errorMessage={errors?.name?.message as string}/>}
+//
+//                 <Label htmlFor="description">Description</Label>
+//                 <Input {...register("description")} id="description" placeholder="Description..."/>
+//                 {errors?.description && <FormError errorMessage={errors?.description?.message as string}/>}
+//
+//                 <Label htmlFor="image">Image</Label>
+//                 <Input {...register("image")} id="image" variant="file" type="file" placeholder="Image..."/>
+//                 {errors?.image && <FormError errorMessage={errors?.image?.message as string}/>}
+//                 {/*<img src={props.prevImage}/>*/}
+//
+//                 <div className="flex w-full items-center justify-center gap-5">
+//                     <Button disabled={isLoading} size="lg" type="submit">
+//                         {isLoading ? (
+//                             <>
+//                                 <IconLoader/>
+//                                 Loading...
+//                             </>
+//                         ) : (
+//                             <>
+//                                 <IconCirclePlus/>
+//                                 Save Changes
+//                             </>
+//                         )}
+//                     </Button>
+//                     <Button disabled={isLoading} size="lg" type="button" variant="cancel" onClick={() => close()}>
+//                         <IconCircleX/>
+//                         Cancel
+//                     </Button>
+//                 </div>
+//             </form>
+//         </Modal>
+//     );
+// };
+//
+// export default CategoryEditModal;

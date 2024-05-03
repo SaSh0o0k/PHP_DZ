@@ -5,7 +5,7 @@ import { classNames } from "../utils/classNames.ts";
 import MenuItem from "./ui/MenuItem.tsx";
 import { Button } from "./ui/Button.tsx";
 import Breadcrumb from "./Breadcrumb.tsx";
-import Drawer from "./ui/drawer.tsx";
+import Drawer from "./ui/Drawer.tsx";
 
 type AdminNavbarProps = {
     showSidebar: boolean;

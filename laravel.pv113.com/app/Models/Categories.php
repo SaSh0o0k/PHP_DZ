@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @method static create(array $inputs)
- * @method static findOrFail($id)
+ * @method static find(int $id)
+ * @method static inRandomOrder()
  */
 class Categories extends Model
 {
@@ -18,4 +19,9 @@ class Categories extends Model
         'image',
         'is_delete'
     ];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

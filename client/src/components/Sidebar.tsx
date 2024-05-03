@@ -11,7 +11,7 @@ import {
 } from "@tabler/icons-react";
 import AdminNavbar from "./AdminNavbar.tsx";
 import { classNames } from "../utils/classNames.ts";
-import { Link } from "./ui/link.tsx";
+import { Link } from "./ui/Link.tsx";
 
 type MenuItem = {
     title: string;
