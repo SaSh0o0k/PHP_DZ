@@ -11,10 +11,10 @@ type MenuLinkProps = {
 
 const MenuItem = ({ title, path, icon, variants }: MenuLinkProps) => {
     return (
-        <li className="rounded-lg">
+        <div className="w-full rounded-lg">
             <NavLink
                 to={path}
-                className={({ isActive }: { isActive: boolean }) =>
+                className={({isActive}: { isActive: boolean }) =>
                     classNames(
                         "flex items-center gap-4 rounded-lg px-4 py-3 text-sm font-semibold text-black hover:bg-gray-200",
                         isActive && "bg-black text-gray-50 shadow-md hover:bg-black",
@@ -25,7 +25,7 @@ const MenuItem = ({ title, path, icon, variants }: MenuLinkProps) => {
                 {icon}
                 {title}
             </NavLink>
-        </li>
+        </div>
     );
 };
 

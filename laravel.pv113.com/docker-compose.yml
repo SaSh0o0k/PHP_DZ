@@ -16,12 +16,12 @@ services:
 
   app:
     image: sash0o0k/pv113_laravel:latest
-    #    build:
-    #        context: .
-    #        dockerfile: Dockerfile
+#    build:
+#        context: .
+#        dockerfile: Dockerfile
     volumes:
         -   /data/website/images:/var/www/html/public/upload
-    #        -   D:\images:/var/www/html/public/upload
+#        -   D:\images:/var/www/html/public/upload
     #    depends_on:
     #      - db
     ports:
@@ -30,3 +30,11 @@ services:
     #            - uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     networks:
       - my-laravel-network
+  client:
+    image: sash0o0k/pv113-client:latest 
+    ports:
+      - "5050:80" 
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 5

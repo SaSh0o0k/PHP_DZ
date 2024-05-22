@@ -5,7 +5,6 @@ import {
     IconHome,
     IconHomeStats,
     IconListCheck,
-    IconMessageShare,
     IconTruckDelivery,
     IconUsers,
 } from "@tabler/icons-react";
@@ -26,18 +25,13 @@ const menu: MenuItem[] = [
         icon: <IconHome />,
     },
     {
-        title: "Posts",
-        path: "/posts",
-        icon: <IconMessageShare />,
-    },
-    {
         title: "Users",
         path: "/users",
         icon: <IconUsers />,
     },
     {
-        title: "Tasks",
-        path: "/tasks",
+        title: "Categories",
+        path: "/categories",
         icon: <IconListCheck />,
     },
     {

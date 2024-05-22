@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SampleEmail;
 use App\Models\Categories;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 
@@ -46,6 +48,8 @@ class CategoriesController extends Controller
         if ($searchTerm) {
             $query->where('name', 'like', "%{$searchTerm}%");
         }
+
+        $query->where("is_delete", false);
 
         $data = $query->paginate($perPage, ['*'], 'page', $page);
         return response()->json($data)

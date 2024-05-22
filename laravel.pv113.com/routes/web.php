@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
-//use Illuminate\Support\Facades\URL;
-//URL::forceScheme('https');
 //Route::get('/', function () {
 //    return view('welcome');
 //});
+
+Route::get('/login', function () {
+    return response()->json(['error' => 'Unauthorized'], 401);
+})->name('login');
 
 // returns the home page with all posts
 Route::get('/', PostController::class .'@index')->name('posts.index');
